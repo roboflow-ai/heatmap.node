@@ -1,5 +1,7 @@
+const { HeatmapConfig } = require('./config')
+const { Canvas2dRenderer } = require('./renderer/canvas2d')
 
-var Renderer = (function RendererClosure() {
+exports.Renderer = (function RendererClosure() {
 
   var rendererFn = false;
 

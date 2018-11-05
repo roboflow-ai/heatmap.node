@@ -1,3 +1,8 @@
+const Util = require('./util')
+const { HeatmapConfig } = require('./config')
+const { Renderer } = require('./renderer')
+const { Store } = require('./data')
+
 // Heatmap Constructor
 var Heatmap = (function HeatmapClosure() {
 
@@ -128,15 +133,9 @@ var Heatmap = (function HeatmapClosure() {
 
 })();
 
-
-// core
-var heatmapFactory = {
-  create: function(config) {
-    return new Heatmap(config);
-  },
-  register: function(pluginKey, plugin) {
-    HeatmapConfig.plugins[pluginKey] = plugin;
-  }
-};
-
-return heatmapFactory;
+exports.create = function(config) {
+  return new Heatmap(config);
+}
+exports.register = function(pluginKey, plugin) {
+  HeatmapConfig.plugins[pluginKey] = plugin;
+}

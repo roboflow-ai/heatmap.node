@@ -1,9 +1,10 @@
+const { createCanvas } = require('canvas')
 
 var Canvas2dRenderer = (function Canvas2dRendererClosure() {
 
   var _getColorPalette = function(config) {
     var gradientConfig = config.gradient || config.defaultGradient;
-    var paletteCanvas = document.createElement('canvas');
+    var paletteCanvas = createCanvas();
     var paletteCtx = paletteCanvas.getContext('2d');
 
     paletteCanvas.width = 256;
@@ -11,7 +12,7 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
 
     var gradient = paletteCtx.createLinearGradient(0, 0, 256, 1);
     for (var key in gradientConfig) {
-      gradient.addColorStop(key, gradientConfig[key]);
+      gradient.addColorStop(key - 0, gradientConfig[key]);
     }
 
     paletteCtx.fillStyle = gradient;
@@ -21,7 +22,7 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
   };
 
   var _getPointTemplate = function(radius, blurFactor) {
-    var tplCanvas = document.createElement('canvas');
+    var tplCanvas = createCanvas();
     var tplCtx = tplCanvas.getContext('2d');
     var x = radius;
     var y = radius;
@@ -81,28 +82,19 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
 
 
   function Canvas2dRenderer(config) {
-    var container = config.container;
-    var shadowCanvas = this.shadowCanvas = document.createElement('canvas');
-    var canvas = this.canvas = config.canvas || document.createElement('canvas');
+    var shadowCanvas = this.shadowCanvas = createCanvas();
+    var canvas = this.canvas = config.canvas || createCanvas();
     var renderBoundaries = this._renderBoundaries = [10000, 10000, 0, 0];
 
-    var computed = getComputedStyle(config.container) || {};
+    console.log('config', config)
 
     canvas.className = 'heatmap-canvas';
 
-    this._width = canvas.width = shadowCanvas.width = config.width || +(computed.width.replace(/px/,''));
-    this._height = canvas.height = shadowCanvas.height = config.height || +(computed.height.replace(/px/,''));
+    this._width = canvas.width = shadowCanvas.width = config.width || +(config.width);
+    this._height = canvas.height = shadowCanvas.height = config.height || +(config.height);
 
     this.shadowCtx = shadowCanvas.getContext('2d');
     this.ctx = canvas.getContext('2d');
-
-    // @TODO:
-    // conditional wrapper
-
-    canvas.style.cssText = shadowCanvas.style.cssText = 'position:absolute;left:0;top:0;';
-
-    container.style.position = 'relative';
-    container.appendChild(canvas);
 
     this._palette = _getColorPalette(config);
     this._templates = {};
@@ -303,3 +295,5 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
 
   return Canvas2dRenderer;
 })();
+
+exports.Canvas2dRenderer = Canvas2dRenderer

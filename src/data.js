@@ -1,4 +1,6 @@
-var Store = (function StoreClosure() {
+const { HeatmapConfig } = require('./config')
+
+exports.Store = (function StoreClosure() {
 
   var Store = function Store(config) {
     this._coordinator = {};
@@ -57,13 +59,13 @@ var Store = (function StoreClosure() {
           }
           return false;
         } else {
-          return { 
-            x: x, 
+          return {
+            x: x,
             y: y,
-            value: value, 
+            value: value,
             radius: radius,
             min: min,
-            max: max 
+            max: max
           };
         }
     },
@@ -104,7 +106,7 @@ var Store = (function StoreClosure() {
           this.addData.call(this, dataArr[dataLen]);
         }
       } else {
-        // add to store  
+        // add to store
         var organisedEntry = this._organiseData(arguments[0], true);
         if (organisedEntry) {
           // if it's the first datapoint initialize the extremas with it
@@ -134,7 +136,7 @@ var Store = (function StoreClosure() {
       }
       this._max = data.max;
       this._min = data.min || 0;
-      
+
       this._onExtremaChange();
       this._coordinator.emit('renderall', this._getInternalData());
       return this;
@@ -158,11 +160,11 @@ var Store = (function StoreClosure() {
       this._coordinator = coordinator;
     },
     _getInternalData: function() {
-      return { 
+      return {
         max: this._max,
-        min: this._min, 
+        min: this._min,
         data: this._data,
-        radi: this._radi 
+        radi: this._radi
       };
     },
     getData: function() {
@@ -196,7 +198,7 @@ var Store = (function StoreClosure() {
                 }
               } else {
                 continue;
-              } 
+              }
             }
           }
         }
