@@ -86,8 +86,6 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
     var canvas = this.canvas = config.canvas || createCanvas();
     var renderBoundaries = this._renderBoundaries = [10000, 10000, 0, 0];
 
-    console.log('config', config)
-
     canvas.className = 'heatmap-canvas';
 
     this._width = canvas.width = shadowCanvas.width = config.width || +(config.width);
@@ -289,6 +287,9 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
     },
     getDataURL: function() {
       return this.canvas.toDataURL();
+    },
+    getBuffer: function () {
+      return this.canvas.toBuffer();
     }
   };
 

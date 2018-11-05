@@ -117,6 +117,9 @@ var Heatmap = (function HeatmapClosure() {
     getDataURL: function() {
       return this._renderer.getDataURL();
     },
+    getBuffer: function() {
+      return this._renderer.getBuffer();
+    },
     getValueAt: function(point) {
 
       if (this._store.getValueAt) {
