@@ -9,7 +9,7 @@
     "url": "https://www.patrick-wied.at/"
   },
   "main": "build/heatmap.js",
-  "devDependencies": {
+  "dependencies": {
     "canvas": "^2.0.1"
   },
   "devDependencies": {
