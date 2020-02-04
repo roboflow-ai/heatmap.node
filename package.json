@@ -10,7 +10,7 @@
   },
   "main": "build/heatmap.js",
   "dependencies": {
-    "canvas": "^2.0.1"
+    "canvas": "^2.6.1"
   },
   "devDependencies": {
     "grunt": ">= 0.4.1",
