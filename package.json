@@ -28,6 +28,7 @@
     "leaflet"
   ],
   "files": [
+    "src",
     "build",
     "plugins",
     "examples",
