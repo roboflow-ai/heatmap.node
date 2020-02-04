@@ -4,7 +4,7 @@
  * Copyright 2008-2016 Patrick Wied <heatmapjs@patrick-wied.at> - All rights reserved.
  * Dual licensed under MIT and Beerware license 
  *
- * :: 2016-09-05 01:16
+ * :: 2020-02-04 13:41
  */
 ;(function (name, context, factory) {
 
@@ -20,19 +20,24 @@
 })("h337", this, function () {
 
 // Heatmap Config stores default values and will be merged with instance config
-var HeatmapConfig = {
+exports.HeatmapConfig = {
+  width: 200,
+  height: 200,
   defaultRadius: 40,
   defaultRenderer: 'canvas2d',
   defaultGradient: { 0.25: "rgb(0,0,255)", 0.55: "rgb(0,255,0)", 0.85: "yellow", 1.0: "rgb(255,0,0)"},
   defaultMaxOpacity: 1,
   defaultMinOpacity: 0,
-  defaultBlur: .85,
+  defaultBlur: 0.85,
   defaultXField: 'x',
   defaultYField: 'y',
-  defaultValueField: 'value', 
+  defaultValueField: 'value',
   plugins: {}
 };
-var Store = (function StoreClosure() {
+
+const { HeatmapConfig } = require('./config')
+
+exports.Store = (function StoreClosure() {
 
   var Store = function Store(config) {
     this._coordinator = {};
@@ -91,13 +96,13 @@ var Store = (function StoreClosure() {
           }
           return false;
         } else {
-          return { 
-            x: x, 
+          return {
+            x: x,
             y: y,
-            value: value, 
+            value: value,
             radius: radius,
             min: min,
-            max: max 
+            max: max
           };
         }
     },
@@ -138,7 +143,7 @@ var Store = (function StoreClosure() {
           this.addData.call(this, dataArr[dataLen]);
         }
       } else {
-        // add to store  
+        // add to store
         var organisedEntry = this._organiseData(arguments[0], true);
         if (organisedEntry) {
           // if it's the first datapoint initialize the extremas with it
@@ -168,7 +173,7 @@ var Store = (function StoreClosure() {
       }
       this._max = data.max;
       this._min = data.min || 0;
-      
+
       this._onExtremaChange();
       this._coordinator.emit('renderall', this._getInternalData());
       return this;
@@ -192,11 +197,11 @@ var Store = (function StoreClosure() {
       this._coordinator = coordinator;
     },
     _getInternalData: function() {
-      return { 
+      return {
         max: this._max,
-        min: this._min, 
+        min: this._min,
         data: this._data,
-        radi: this._radi 
+        radi: this._radi
       };
     },
     getData: function() {
@@ -230,7 +235,7 @@ var Store = (function StoreClosure() {
                 }
               } else {
                 continue;
-              } 
+              }
             }
           }
         }
@@ -246,11 +251,13 @@ var Store = (function StoreClosure() {
   return Store;
 })();
 
+const { createCanvas } = require('canvas')
+
 var Canvas2dRenderer = (function Canvas2dRendererClosure() {
 
   var _getColorPalette = function(config) {
     var gradientConfig = config.gradient || config.defaultGradient;
-    var paletteCanvas = document.createElement('canvas');
+    var paletteCanvas = createCanvas();
     var paletteCtx = paletteCanvas.getContext('2d');
 
     paletteCanvas.width = 256;
@@ -258,7 +265,7 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
 
     var gradient = paletteCtx.createLinearGradient(0, 0, 256, 1);
     for (var key in gradientConfig) {
-      gradient.addColorStop(key, gradientConfig[key]);
+      gradient.addColorStop(key - 0, gradientConfig[key]);
     }
 
     paletteCtx.fillStyle = gradient;
@@ -268,7 +275,7 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
   };
 
   var _getPointTemplate = function(radius, blurFactor) {
-    var tplCanvas = document.createElement('canvas');
+    var tplCanvas = createCanvas();
     var tplCtx = tplCanvas.getContext('2d');
     var x = radius;
     var y = radius;
@@ -328,28 +335,17 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
 
 
   function Canvas2dRenderer(config) {
-    var container = config.container;
-    var shadowCanvas = this.shadowCanvas = document.createElement('canvas');
-    var canvas = this.canvas = config.canvas || document.createElement('canvas');
+    var shadowCanvas = this.shadowCanvas = createCanvas();
+    var canvas = this.canvas = config.canvas || createCanvas();
     var renderBoundaries = this._renderBoundaries = [10000, 10000, 0, 0];
-
-    var computed = getComputedStyle(config.container) || {};
 
     canvas.className = 'heatmap-canvas';
 
-    this._width = canvas.width = shadowCanvas.width = config.width || +(computed.width.replace(/px/,''));
-    this._height = canvas.height = shadowCanvas.height = config.height || +(computed.height.replace(/px/,''));
+    this._width = canvas.width = shadowCanvas.width = config.width || +(config.width);
+    this._height = canvas.height = shadowCanvas.height = config.height || +(config.height);
 
     this.shadowCtx = shadowCanvas.getContext('2d');
     this.ctx = canvas.getContext('2d');
-
-    // @TODO:
-    // conditional wrapper
-
-    canvas.style.cssText = shadowCanvas.style.cssText = 'position:absolute;left:0;top:0;';
-
-    container.style.position = 'relative';
-    container.appendChild(canvas);
 
     this._palette = _getColorPalette(config);
     this._templates = {};
@@ -544,6 +540,9 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
     },
     getDataURL: function() {
       return this.canvas.toDataURL();
+    },
+    getBuffer: function () {
+      return this.canvas.toBuffer();
     }
   };
 
@@ -551,8 +550,12 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
   return Canvas2dRenderer;
 })();
 
+exports.Canvas2dRenderer = Canvas2dRenderer
 
-var Renderer = (function RendererClosure() {
+const { HeatmapConfig } = require('./config')
+const { Canvas2dRenderer } = require('./renderer/canvas2d')
+
+exports.Renderer = (function RendererClosure() {
 
   var rendererFn = false;
 
@@ -563,20 +566,23 @@ var Renderer = (function RendererClosure() {
   return rendererFn;
 })();
 
-
-var Util = {
-  merge: function() {
-    var merged = {};
-    var argsLen = arguments.length;
-    for (var i = 0; i < argsLen; i++) {
-      var obj = arguments[i]
-      for (var key in obj) {
-        merged[key] = obj[key];
-      }
+exports.merge = function() {
+  var merged = {};
+  var argsLen = arguments.length;
+  for (var i = 0; i < argsLen; i++) {
+    var obj = arguments[i]
+    for (var key in obj) {
+      merged[key] = obj[key];
     }
-    return merged;
   }
+  return merged;
 };
+
+const Util = require('./util')
+const { HeatmapConfig } = require('./config')
+const { Renderer } = require('./renderer')
+const { Store } = require('./data')
+
 // Heatmap Constructor
 var Heatmap = (function HeatmapClosure() {
 
@@ -691,6 +697,9 @@ var Heatmap = (function HeatmapClosure() {
     getDataURL: function() {
       return this._renderer.getDataURL();
     },
+    getBuffer: function() {
+      return this._renderer.getBuffer();
+    },
     getValueAt: function(point) {
 
       if (this._store.getValueAt) {
@@ -707,18 +716,12 @@ var Heatmap = (function HeatmapClosure() {
 
 })();
 
-
-// core
-var heatmapFactory = {
-  create: function(config) {
-    return new Heatmap(config);
-  },
-  register: function(pluginKey, plugin) {
-    HeatmapConfig.plugins[pluginKey] = plugin;
-  }
-};
-
-return heatmapFactory;
+exports.create = function(config) {
+  return new Heatmap(config);
+}
+exports.register = function(pluginKey, plugin) {
+  HeatmapConfig.plugins[pluginKey] = plugin;
+}
 
 
 });

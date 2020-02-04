@@ -56,18 +56,16 @@ module.exports = function(grunt) {
       },
       dist: {
         files: packagejson.buildFiles,
-        tasks: ['concat', 'jshint', 'uglify']
+        tasks: ['concat']
       }
     }
   });
 
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
 
   // Default task.
-  grunt.registerTask('default', ['concat', 'jshint', 'uglify', 'watch']);
+  grunt.registerTask('default', ['concat', 'watch']);
 };
